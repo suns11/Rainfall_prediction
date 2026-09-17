@@ -14,7 +14,9 @@ from services.voice import (
     selection_voice as voice_selection,
     section_voice,
     speak_sequence,
-    clean_voice_text
+    clean_voice_text,
+    render_voice_player,
+    process_voice_queue
 )
 
 
@@ -52,30 +54,35 @@ AGRICULTURE_WELCOME_TEXT = (
 
 
 def start_agriculture_welcome():
-    """Start Agriculture voice once per Streamlit session.
-
-    The welcome is followed by the FIRST input instruction only.
-    Other input instructions are triggered by the previous input
-    callback, so all instructions do not play together on page load.
     """
-    if st.session_state.get("agriculture_voice_started", False):
+    Agriculture page open হলে:
+    1. প্রথমে Welcome voice
+    2. Welcome শেষ হলে "বৃষ্টির তথ্যের উৎস নির্বাচন করুন"
+    
+    অন্য কোনো input-এর voice page load-এর সময় বাজবে না।
+    """
+
+    if st.session_state.get(
+        "agriculture_voice_started",
+        False
+    ):
         return
 
-    st.session_state["agriculture_voice_started"] = True
+    st.session_state[
+        "agriculture_voice_started"
+    ] = True
 
-    play_welcome(
-        AGRICULTURE_WELCOME_TEXT,
-        delay=0.5
-    )
+    # IMPORTANT:
+    # Welcome এবং first instruction একই sequence-এর মধ্যে থাকবে।
+    # তাই প্রথমে Welcome শেষ হবে, তারপর instruction বাজবে।
 
-    # This is the first visible input in the current page order.
-    # The selection callback will continue the voice flow.
-    section_voice(
-        "বৃষ্টির তথ্যের উৎস নির্বাচন করুন",
-        key="agri_first_weather_source",
+    speak_sequence(
+        [
+            AGRICULTURE_WELCOME_TEXT,
+            "বৃষ্টির তথ্যের উৎস নির্বাচন করুন"
+        ],
         delay=0.10
     )
-
 
 # ============================================================
 # BANGLA NUMBER
@@ -1606,7 +1613,7 @@ def irrigation_system_section():
 # MAIN INPUT PANEL
 # ============================================================
 
-@st.fragment
+
 def _agriculture_input_panel():
 
     # ========================================================
@@ -2645,5 +2652,11 @@ def show_agriculture():
     # ========================================================
     # RESULT
     # ========================================================
-
     show_agriculture_result()
+        # ========================================================
+    # BROWSER VOICE PLAYER
+    # ========================================================
+
+   
+    process_voice_queue()
+    render_voice_player()
