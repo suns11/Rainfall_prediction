@@ -1,7 +1,8 @@
 streamlit
 pandas
 numpy
-plotly
-requests
 scikit-learn
 catboost
+plotly
+requests
+gTTS
