@@ -6,4 +6,3 @@ catboost
 plotly
 requests
 gTTS
-playsound
